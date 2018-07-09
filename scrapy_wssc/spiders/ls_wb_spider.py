@@ -30,10 +30,10 @@ class ls_wb_spider(scrapy.Spider):
             wait = WebDriverWait(self.driver, 5)
             wait.until(
                 #  等价于 def getA(x) {  return  x.find_element_by_xpath('//ul[@class="post-list"]/li[@class]/a')) }
-                lambda x: x.find_element_by_xpath('//div[@id="newscontent"]/div[@class="1"]/ul'))  # VIP，内容加载完成后爬取
-            sel_list = self.driver.find_elements_by_xpath('//div[@id="newscontent"]/div[@class="1"]/ul/li/span[@class="s2"]/a')
+                lambda x: x.find_element_by_xpath('//div[@id="newscontent"]/div[@class="l"]/ul'))  # VIP，内容加载完成后爬取
+            sel_list = self.driver.find_elements_by_xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li/span[@class="s2"]/a')
             for sel in sel_list:
-                print sel.get_attribute("href")
+                print '==========||||||||||||==========='+sel.get_attribute("href")
             # url_list = [sel.get_attribute("href") for sel in sel_list]
             # print(url_list)
             # url_set |= set(url_list)
