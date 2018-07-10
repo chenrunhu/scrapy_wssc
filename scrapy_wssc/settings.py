@@ -88,3 +88,9 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+POSTGRES_SERVER = '104.225.148.44'
+POSTGRES_PORT = 5432
+POSTGRES_DB = 'wsscdb'
+POSTGRES_USER = 'postgres'
+POSTGRES_PW = 'postgres'
