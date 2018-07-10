@@ -90,11 +90,11 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 ITEM_PIPELINES = {
-    'scrapy_wssc.pipelines.PgPipeline': 1000,
+    'scrapy_wssc.pipelines.PgPipeline.PgPipeline': 1000,
 }
 
-POSTGRES_SERVER = '104.225.148.44'
-POSTGRES_PORT = 5432
+POSTGRES_SERVER = '###,###,###,###'
+POSTGRES_PORT = 15432
 POSTGRES_DB = 'wsscdb'
 POSTGRES_USER = 'postgres'
 POSTGRES_PW = 'postgres'

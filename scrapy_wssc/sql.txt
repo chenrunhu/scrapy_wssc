@@ -1,0 +1,34 @@
+DROP TABLE "public"."t_book";
+CREATE TABLE "public"."t_book" (
+"id" int4 NOT NULL,
+"cate_id" int4 NOT NULL,
+"name" varchar(50) NOT NULL,
+"author" varchar(50) NOT NULL,
+"create_date" varchar(32),
+"is_hot" bool,
+"is_serial" bool,
+"status" int4,
+"last_update" varchar(32),
+"describe" varchar(255)
+);
+ALTER TABLE "public"."t_book" ADD PRIMARY KEY ("id");
+
+
+DROP TABLE "public"."t_book_category";
+CREATE TABLE "public"."t_book_category" (
+"id" int4 NOT NULL,
+"name" varchar(50) NOT NULL,
+"no" int4 NOT NULL,
+"create_date" varchar(32),
+"status" int4
+);
+
+DROP TABLE "public"."t_book_content";
+CREATE TABLE "public"."t_book_content" (
+"id" int4 NOT NULL,
+"book_id" int4 NOT NULL,
+"title" varchar(50) NOT NULL,
+"content" text NOT NULL,
+"create_date" varchar(32)
+);
+ALTER TABLE "public"."t_book_content" ADD PRIMARY KEY ("id");
