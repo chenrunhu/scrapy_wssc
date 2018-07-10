@@ -26,10 +26,10 @@ class PgPipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, BookItem):
-            _sql = """INSERT INTO t_book(id,cate_id,name,author,create_date,is_hot,is_serial,status,last_update,describe)
-                  VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');""" % (
+            _sql = """INSERT INTO t_book(id,cate_id,name,author,create_date,is_hot,is_serial,status,last_update,describe,book_url)
+                  VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');""" % (
             item['id'], item['cateId'], item['name'], item['author'], item['create_date'], item['isHot'],
-            item['isSerial'], item['status'],item['lastUpdate'], item['describe'])
+            item['isSerial'], item['status'],item['lastUpdate'], item['describe'], item['bookUrl'])
 
         try:
             self.cursor.execute(self.cursor.mogrify(_sql))

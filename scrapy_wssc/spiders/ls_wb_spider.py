@@ -50,6 +50,7 @@ class ls_wb_spider(scrapy.Spider):
             bookItem['status'] = 1
             bookItem['lastUpdate'] = datetime.datetime.now().strftime('%Y-')+ li.find_element_by_xpath('span[@class="s5"]').text
             bookItem['describe'] =''
+            bookItem['bookUrl'] = li.find_element_by_xpath('span[@class="s2"]/a').get_attribute("href")
             bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             yield bookItem
             #print li.find_element_by_class_name('s4').text
