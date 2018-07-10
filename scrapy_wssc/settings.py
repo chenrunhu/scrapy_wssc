@@ -89,6 +89,10 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+ITEM_PIPELINES = {
+    'scrapy_wssc.pipelines.PgPipeline': 1000,
+}
+
 POSTGRES_SERVER = '104.225.148.44'
 POSTGRES_PORT = 5432
 POSTGRES_DB = 'wsscdb'
