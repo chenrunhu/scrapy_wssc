@@ -29,5 +29,6 @@ CREATE TABLE "public"."t_book_content" (
 "book_id" int4 NOT NULL,
 "title" varchar(50) NOT NULL,
 "content" text NOT NULL,
-"create_date" varchar(32)
+"create_date" varchar(32),
+"link_url" varchar(255)
 );

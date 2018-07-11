@@ -76,7 +76,7 @@ class ls_wb_spider(scrapy.Spider):
 
     def get_book_content(self,response):
         pattern = re.compile(r'^(https://www.qu.la/.*?)(\d+)(.html)$')
-         
+
         soup = bs4.BeautifulSoup(response.text, 'lxml')
         bookContentItem = BookContentItem();
         bookContentItem['id'] = pattern.search(response.meta['url']).group(2)
