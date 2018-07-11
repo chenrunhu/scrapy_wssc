@@ -20,37 +20,37 @@ class ls_wb_spider(scrapy.Spider):
         self.bid = bid  # 参数bid由此传入
         self.start_urls = ['https://www.qu.la/lishixiaoshuo/']
         self.allowed_domain = 'www.qu.la'
-        self.driver = webdriver.Chrome(
-            executable_path="C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe")
-        self.driver.set_page_load_timeout(10)  # throw a TimeoutException when thepage load time is more than 5 seconds.
+        #self.driver = webdriver.Chrome(
+         #   executable_path="C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe")
+        #self.driver.set_page_load_timeout(10)  # throw a TimeoutException when thepage load time is more than 5 seconds.
 
     def parse(self, response):
         pattern = re.compile(r'\d+')
 
         """模拟浏览器实现翻页，并解析每一个话题列表页的url_list
         """
-        url_set = set()  # 话题url的集合
-        self.driver.get(response.url)
-
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(
-            #  等价于 def getA(x) {  return  x.find_element_by_xpath('//ul[@class="post-list"]/li[@class]/a')) }
-            lambda x: x.find_element_by_xpath('//div[@id="newscontent"]/div[@class="l"]/ul'))  # VIP，内容加载完成后爬取
-        sel_list = self.driver.find_elements_by_xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li')
+        # url_set = set()  # 话题url的集合
+        # self.driver.get(response.url)
+        #
+        # wait = WebDriverWait(self.driver, 10)
+        # wait.until(
+        #     #  等价于 def getA(x) {  return  x.find_element_by_xpath('//ul[@class="post-list"]/li[@class]/a')) }
+        #     lambda x: x.find_element_by_xpath('//div[@id="newscontent"]/div[@class="l"]/ul'))  # VIP，内容加载完成后爬取
+        sel_list = response.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li')
         for li in sel_list:
             bookItem = BookItem();
-            bookItem['id'] = pattern.search(li.find_element_by_xpath('span[@class="s2"]/a').get_attribute("href")).group()
+            bookItem['id'] = pattern.search(li.xpath('span[@class="s2"]/a/attribute::href').extract()[0]).group()
             bookItem['cateId'] = 1
            # bookItem['name'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
            # bookItem['author'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
-            bookItem['name'] = li.find_element_by_xpath('span[@class="s2"]/a').text
-            bookItem['author'] = li.find_element_by_xpath('span[@class="s4"]').text
+            bookItem['name'] = li.xpath('span[@class="s2"]/a/text()').extract()[0]
+            bookItem['author'] = li.xpath('span[@class="s4"]/text()').extract()[0]
             bookItem['isHot'] = True
             bookItem['isSerial'] =True
             bookItem['status'] = 1
-            bookItem['lastUpdate'] = datetime.datetime.now().strftime('%Y-')+ li.find_element_by_xpath('span[@class="s5"]').text
+            bookItem['lastUpdate'] = datetime.datetime.now().strftime('%Y-')+ li.xpath('span[@class="s5"]/text()').extract()[0]
             bookItem['describe'] =''
-            bookItem['bookUrl'] = li.find_element_by_xpath('span[@class="s2"]/a').get_attribute("href")
+            bookItem['bookUrl'] = li.xpath('span[@class="s2"]/a/attribute::href').extract()[0]
             bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             yield bookItem
             #print li.find_element_by_class_name('s4').text
