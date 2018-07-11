@@ -49,7 +49,7 @@ class ls_wb_spider(scrapy.Spider):
         soup = bs4.BeautifulSoup(response.text, 'lxml')
 
         bookItem = BookItem();
-        bookItem['id'] = pattern.search(soup.find('div',id="info").find('a',{"style":"color:red;"})).group()
+        bookItem['id'] = pattern.search(soup.find('div',id="info").find('a',{"style":"color:red;"}).attrs['href']).group()
         bookItem['cateId'] = 1
         # bookItem['name'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
         # bookItem['author'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
