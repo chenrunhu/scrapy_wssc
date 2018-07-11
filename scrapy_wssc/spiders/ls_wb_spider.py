@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
 import datetime
+
+import requests
+import bs4
 import scrapy
 from scrapy.spider import BaseSpider
 import scrapy
+from scrapy.http import Request
 from scrapy_wssc.BookItem import BookItem
 import time
 import base64
@@ -25,8 +29,6 @@ class ls_wb_spider(scrapy.Spider):
         #self.driver.set_page_load_timeout(10)  # throw a TimeoutException when thepage load time is more than 5 seconds.
 
     def parse(self, response):
-        pattern = re.compile(r'\d+')
-
         """模拟浏览器实现翻页，并解析每一个话题列表页的url_list
         """
         # url_set = set()  # 话题url的集合
@@ -38,31 +40,36 @@ class ls_wb_spider(scrapy.Spider):
         #     lambda x: x.find_element_by_xpath('//div[@id="newscontent"]/div[@class="l"]/ul'))  # VIP，内容加载完成后爬取
         sel_list = response.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li')
         for li in sel_list:
-            bookItem = BookItem();
-            bookItem['id'] = pattern.search(li.xpath('span[@class="s2"]/a/attribute::href').extract()[0]).group()
-            bookItem['cateId'] = 1
-           # bookItem['name'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
-           # bookItem['author'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
-            bookItem['name'] = li.xpath('span[@class="s2"]/a/text()').extract()[0]
-            bookItem['author'] = li.xpath('span[@class="s4"]/text()').extract()[0]
-            bookItem['isHot'] = True
-            bookItem['isSerial'] =True
-            bookItem['status'] = 1
-            bookItem['lastUpdate'] = datetime.datetime.now().strftime('%Y-')+ li.xpath('span[@class="s5"]/text()').extract()[0]
-            bookItem['describe'] =''
-            bookItem['bookUrl'] = li.xpath('span[@class="s2"]/a/attribute::href').extract()[0]
-            bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            yield bookItem
-            #print li.find_element_by_class_name('s4').text
-        # url_list = [sel.get_attribute("href") for sel in sel_list]
-        # print(url_list)
-        # url_set |= set(url_list)
-        # try:
-        #     wait = WebDriverWait(self.driver, 10)
-        #     wait.until(lambda driver: driver.find_element_by_xpath(
-        #         '//ul[@class="pg1"]/li[@class="pg_next"]'))  # VIP，内容加载完成后爬取
-        #     next_page = self.driver.find_element_by_xpath('//ul[@class="pg1"]/li[@class="pg_next"]')
-        #     next_page.click()  # 模拟点击下一页
-        # except:
-        #     print "#####Arrive thelast page.#####"
-        #     break
+            #book_desc_html = self.get_book_desc('https://www.qu.la'+li.xpath('span[@class="s2"]/a/attribute::href').extract()[0])
+            #soup = bs4.BeautifulSoup(book_desc_html, 'lxml')
+            yield  scrapy.Request(url='https://www.qu.la'+li.xpath('span[@class="s2"]/a/attribute::href').extract()[0],callback=self.get_book_info)
+
+    def get_book_info(self, response):
+        pattern = re.compile(r'\d+')
+        soup = bs4.BeautifulSoup(response.text, 'lxml')
+
+        bookItem = BookItem();
+        bookItem['id'] = pattern.search(soup.find('div',id="info").find('a',{"style":"color:red;"})).group()
+        bookItem['cateId'] = 1
+        # bookItem['name'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
+        # bookItem['author'] = li.find_element_by_xpath('//li/span[@class="s4"]').text
+        bookItem['name'] = li.xpath('span[@class="s2"]/a/text()').extract()[0]
+        bookItem['author'] = li.xpath('span[@class="s4"]/text()').extract()[0]
+        bookItem['isHot'] = True
+        bookItem['isSerial'] = True
+        bookItem['status'] = 1
+        bookItem['lastUpdate'] = datetime.datetime.now().strftime('%Y-') + \
+                                 li.xpath('span[@class="s5"]/text()').extract()[0]
+        # bookItem['describe'] = soup.find(name='div', attrs={'id': 'intro'}).string
+        bookItem['describe'] = ''
+        bookItem['bookUrl'] = 'https://www.qu.la' + li.xpath('span[@class="s2"]/a/attribute::href').extract()[0]
+        bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            r = requests.get(url, timeout=30)
+            r.raise_for_status
+            r.encoding = r.apparent_encoding
+            # r.encoding = 'utf-8'
+            return r.text
+        except:
+            print("Open Error!!!")
+
