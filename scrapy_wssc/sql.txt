@@ -31,4 +31,3 @@ CREATE TABLE "public"."t_book_content" (
 "content" text NOT NULL,
 "create_date" varchar(32)
 );
-ALTER TABLE "public"."t_book_content" ADD PRIMARY KEY ("id");

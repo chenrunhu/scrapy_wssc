@@ -1,7 +1,8 @@
 import psycopg2
 from scrapy.utils.project import get_project_settings
 
-from scrapy_wssc.BookItem import BookItem
+from scrapy_wssc.Item.BookContentItem import BookContentItem
+from scrapy_wssc.Item.BookItem import BookItem
 
 class PgPipeline(object):
     def __init__(self):
@@ -30,7 +31,10 @@ class PgPipeline(object):
                   VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');""" % (
             item['id'], item['cateId'], item['name'], item['author'], item['create_date'], item['isHot'],
             item['isSerial'], item['status'],item['lastUpdate'], item['describe'], item['bookUrl'])
-
+        elif (item, BookContentItem):
+            _sql = """INSERT INTO t_book_content(id,book_id,title,content,create_date,link_url)
+                              VALUES ('%s','%s','%s','%s','%s','%s');""" % (
+                item['id'], item['bookId'], item['title'], item['content'], item['createDate'], item['linkUrl'])
         try:
             self.cursor.execute(self.cursor.mogrify(_sql))
             self.connection.commit()
