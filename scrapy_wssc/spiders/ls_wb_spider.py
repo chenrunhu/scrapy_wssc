@@ -25,6 +25,8 @@ class ls_wb_spider(scrapy.Spider):
          #   executable_path="C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe")
         #self.driver.set_page_load_timeout(10)  # throw a TimeoutException when thepage load time is more than 5 seconds.
 
+        #self.bookService = BookServiceImpl()
+
     def parse(self, response):
         """模拟浏览器实现翻页，并解析每一个话题列表页的url_list
         """
@@ -47,10 +49,12 @@ class ls_wb_spider(scrapy.Spider):
                 cateId = 2
             elif cmp(cateName, u'[都市言情]') == 0:
                 cateId = 3
-            yield scrapy.Request(url='https://www.qu.la'+li.xpath('span[@class="s2"]/a/attribute::href').extract()[0],callback=self.get_book_info, meta={'url': response.request.url,"cateId":cateId})
+            yield scrapy.Request(url='https://www.qu.la'+li.xpath('span[@class="s2"]/a/attribute::href').extract()[0],callback=self.get_book_info, meta={"cateId":cateId})
 
     def get_book_info(self, response):
         pattern = re.compile(r'\d+')
+        #bookContentPatten = re.compile(r'^\d+.html')
+
        # print response.text
         soup = bs4.BeautifulSoup(response.text, 'lxml')
 
@@ -63,16 +67,32 @@ class ls_wb_spider(scrapy.Spider):
         bookItem['isSerial'] = True
         bookItem['status'] = 1
         bookItem['lastUpdate'] = soup.find('div',id="info").find_all('p')[2].get_text().split(u'：' )[1]
-        # bookItem['describe'] = soup.find(name='div', attrs={'id': 'intro'}).string
         bookItem['describe'] = soup.find('div',id="intro").get_text().replace(" ", "")
-        bookItem['bookUrl'] = response.meta['url']
+        bookItem['bookUrl'] = response.request.url
         bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # LastUpdatechapter = self.bookService.getLastUpdatechapter(bookItem["id"])
+        # if(LastUpdatechapter == None):
+        #     #print '本书还未采集！！！'
+        #     #bookContentUrl = response.xpath('//div[@id="list"]/dl/dt')[1].xpath('dd')[0].xpath('a/attribute::href').extract()[0]
+        #     bookContentUrl = soup.find('div', id="list").dl.find_all('dt')[1].next_sibling.next_sibling.a.attrs['href']
+        #     if bookContentPatten.search(bookContentUrl) :
+        #         bookContentUrl = response.request.url + bookContentPatten.search(bookContentUrl).group()
+        #     else:
+        #         bookContentUrl = 'https://www.qu.la' + bookContentUrl
+        #     firstChapterUrl = bookContentUrl
+        #     print u'书名：'+ bookItem['name']+ u',第一章地址：'+firstChapterUrl
+        # else:
+        #     print '本编号：'+str(LastUpdatechapter[0]) + ',章节地址：'+str(LastUpdatechapter[1])
         yield bookItem
 
         book_content_list = response.xpath('//div[@id="list"]/dl/dd')
         for con_li in book_content_list:
-            con_url = 'https://www.qu.la/' + con_li.xpath('a/attribute::href').extract()[0]
-            yield scrapy.Request(url=con_url,callback=self.get_book_content, meta={'url': con_url,"bookId":bookItem["id"]})
+            con_url =  con_li.xpath('a/attribute::href').extract()[0]
+            if con_url.startswith('/book/'):
+                yield scrapy.Request(url='https://www.qu.la' + con_url, callback=self.get_book_content,
+                                     meta={'url': 'https://www.qu.la' + con_url, "bookId": bookItem["id"]})
+
 
     def get_book_content(self,response):
         pattern = re.compile(r'^(https://www.qu.la/.*?)(\d+)(.html)$')

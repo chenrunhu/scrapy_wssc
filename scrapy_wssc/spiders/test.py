@@ -1,6 +1,6 @@
 # coding:utf-8
-from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
+#from selenium import webdriver
+#from selenium.webdriver.support.wait import WebDriverWait
 
 #linux安装webdriver:http://splinter-docs-zh-cn.readthedocs.io/zh/latest/drivers/chrome.html
 '''
