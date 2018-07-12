@@ -14,11 +14,11 @@ class BookServiceImpl(BookService):
             # password=settings.get('POSTGRES_PW'),
             # host=settings.get('POSTGRES_SERVER'),
             # port=settings.get('POSTGRES_PORT'),
-            database='wsscdb',
-            user='postgres',
-            password='postgres',
+            database='#',
+            user='#',
+            password='#',
             host='#####',
-            port='125432',
+            port='#',
         )
         self.cursor = self.connection.cursor()
 

@@ -95,6 +95,6 @@ ITEM_PIPELINES = {
 
 POSTGRES_SERVER = '###,###,###'
 POSTGRES_PORT = 15432
-POSTGRES_DB = 'wsscdb'
-POSTGRES_USER = 'postgres'
-POSTGRES_PW = 'postgres'
+POSTGRES_DB = '#'
+POSTGRES_USER = '#'
+POSTGRES_PW = '#'
