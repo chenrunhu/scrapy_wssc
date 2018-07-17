@@ -9,18 +9,18 @@ from scrapy_wssc.Item.BookContentItem import BookContentItem
 from scrapy_wssc.Item.BookItem import BookItem
 
 
-class ls_wb_spider(scrapy.Spider):
-    name = 'ls_wb_spider'
+class mobile_spider(scrapy.Spider):
+    name = 'mobile_spider'
 
     def __init__(self, bid=None):
         """初始化起始页面和游戏bid
         """
-        super(ls_wb_spider, self).__init__()
+        super(mobile_spider, self).__init__()
         self.bid = bid  # 参数bid由此传入
-        self.start_urls = ['https://www.qu.la/lishixiaoshuo/'] #历史小说  1
+        self.start_urls = ['https://m.qu.la/wapsort/4_1.html'] #历史小说  1
                            #'https://www.qu.la/xuanhuanxiaoshuo/',#玄幻小说  2
                           # 'https://www.qu.la/dushixiaoshuo/'] #都市小说  3
-        self.allowed_domain = 'www.qu.la'
+        self.allowed_domain = 'm.qu.la'
         #self.driver = webdriver.Chrome(
          #   executable_path="C:/Program Files (x86)/Google/Chrome/Application/chromedriver.exe")
         #self.driver.set_page_load_timeout(10)  # throw a TimeoutException when thepage load time is more than 5 seconds.
@@ -28,34 +28,35 @@ class ls_wb_spider(scrapy.Spider):
         #self.bookService = BookServiceImpl()
 
     def parse(self, response):
-        """模拟浏览器实现翻页，并解析每一个话题列表页的url_list
-        """
-        # url_set = set()  # 话题url的集合
-        # self.driver.get(response.url)
-        #
-        # wait = WebDriverWait(self.driver, 10)
-        # wait.until(
-        #     #  等价于 def getA(x) {  return  x.find_element_by_xpath('//ul[@class="post-list"]/li[@class]/a')) }
-        #     lambda x: x.find_element_by_xpath('//div[@id="newscontent"]/div[@class="l"]/ul'))  # VIP，内容加载完成后爬取
-        book_list = response.xpath('//div[@id="newscontent"]/div[@class="l"]/ul/li')
+        pattern = re.compile(r'\d+')
+
+        book_list = response.xpath('//div[@class="recommend"]/div[@id="main"]/div')
         for li in book_list:
-            #book_desc_html = self.get_book_desc('https://www.qu.la'+li.xpath('span[@class="s2"]/a/attribute::href').extract()[0])
-            #soup = bs4.BeautifulSoup(book_desc_html, 'lxml')
-            cateName = li.xpath('span[@class="s1"]/text()').extract()[0]
-            cateId = 2
-            if cmp(cateName,u'[历史军事]') == 0 :
-                cateId = 1
-            elif cmp(cateName,u'[玄幻奇幻]') == 0:
-                cateId = 2
-            elif cmp(cateName, u'[都市言情]') == 0:
-                cateId = 3
-            yield scrapy.Request(url='https://www.qu.la'+li.xpath('span[@class="s2"]/a/attribute::href').extract()[0],callback=self.get_book_info, meta={"cateId":cateId})
+            bookItem = BookItem();
+            bookItem['id'] = pattern.search(li.xpath('a/@href').extract()[0]).group()
+            bookItem['cateId'] = 1
+            bookItem['name'] = li.xpath('a/p[@class="title"]/text()').extract()[0].strip()
+            bookItem['author'] = li.xpath('a/p[@class="author"]/text()').extract()[0].split(u'：')[1]
+            bookItem['isHot'] = True
+            bookItem['isSerial'] = True
+            bookItem['status'] = 1
+            bookItem['lastUpdate'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            bookItem['describe'] = li.xpath('p[@class="review"]/text()').extract()[1].split(u'：')[1].strip()
+            bookItem['bookUrl'] = 'https://m.qu.la'+li.xpath('a/@href').extract()[0]
+            bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            yield bookItem
+
+            #爬取章节
+            yield scrapy.Request(url='https://m.qu.la/booklist/'+bookItem['id']+'.html',callback=self.get_book_chapter_list, meta={"cateId":1})
+
+    def get_book_chapter_list(self,response):
+        soup = bs4.BeautifulSoup(response.text, 'lxml')
+        chapterList = soup.find('div',id="chapterlist").p
+        for chapter in chapterList:
+            pass
 
     def get_book_info(self, response):
         pattern = re.compile(r'\d+')
-        #bookContentPatten = re.compile(r'^\d+.html')
-
-       # print response.text
         soup = bs4.BeautifulSoup(response.text, 'lxml')
 
         bookItem = BookItem();
@@ -67,7 +68,7 @@ class ls_wb_spider(scrapy.Spider):
         bookItem['isSerial'] = True
         bookItem['status'] = 1
         bookItem['lastUpdate'] = soup.find('div',id="info").find_all('p')[2].get_text().split(u'：' )[1]
-        bookItem['describe'] = soup.find('div',id="intro").get_text().replace(" ", "").strip()
+        bookItem['describe'] = soup.find('div',id="intro").get_text().replace(" ", "")
         bookItem['bookUrl'] = response.request.url
         bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -102,7 +103,7 @@ class ls_wb_spider(scrapy.Spider):
         bookContentItem['id'] = pattern.search(response.meta['url']).group(2)
         bookContentItem['bookId'] =  response.meta['bookId']
         bookContentItem['title'] =  soup.find('div',attrs={"class":"bookname"}).h1.get_text()
-        bookContentItem['content'] = soup.find('div',id="content").get_text().strip()
+        bookContentItem['content'] = soup.find('div',id="content").get_text()
         bookContentItem['linkUrl'] = response.meta['url']
         bookContentItem['createDate'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         yield bookContentItem

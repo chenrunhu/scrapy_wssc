@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import psycopg2
 
 from scrapy.utils.project import get_project_settings
@@ -14,11 +16,11 @@ class BookServiceImpl(BookService):
             # password=settings.get('POSTGRES_PW'),
             # host=settings.get('POSTGRES_SERVER'),
             # port=settings.get('POSTGRES_PORT'),
-            database='#',
-            user='#',
-            password='#',
-            host='#####',
-            port='#',
+            database='wsscdb',
+            user='postgres',
+            password='postgres',
+            host='10.0.0.19',
+            port='5432',
         )
         self.cursor = self.connection.cursor()
 
