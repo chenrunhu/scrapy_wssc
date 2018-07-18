@@ -26,7 +26,6 @@ class biqukan_mobile_spider(scrapy.Spider):
         for li in book_list:
             book_href = li.select('span[class="s2"] a')[0].get('href')
 
-            #爬取章节
             yield scrapy.Request(url=u'http://m.biqukan.com'+book_href,callback=self.get_book_info, meta={"cateId":2,"book_href":book_href})
 
     def get_book_info(self, response):
@@ -34,31 +33,18 @@ class biqukan_mobile_spider(scrapy.Spider):
         soup = bs4.BeautifulSoup(response.text, 'lxml')
 
         bookItem = BookItem();
-        bookItem['id'] = pattern.search(soup.find('div',id="info").find('a',{"style":"color:red;"}).attrs['href']).group()
+        bookItem['id'] = pattern.search(response.meta['book_href']).group(2)
         bookItem['cateId'] = response.meta['cateId']
-        bookItem['name'] = soup.find('div',id="info").h1.get_text()
-        bookItem['author'] = soup.find('div',id="info").p.get_text().split(u'：' )[1]
+        bookItem['name'] = soup.select('div[class="book_info"] div[class="book_box"] dl dt[class="name"]')[0].string
+        bookItem['author'] = soup.select('div[class="book_info"] div[class="book_box"] dl dd[class="dd_box"] span')[0].string.split(u'：' )[1]
         bookItem['isHot'] = True
         bookItem['isSerial'] = True
         bookItem['status'] = 1
-        bookItem['lastUpdate'] = soup.find('div',id="info").find_all('p')[2].get_text().split(u'：' )[1]
-        bookItem['describe'] = soup.find('div',id="intro").get_text().replace(" ", "")
+        bookItem['lastUpdate'] = soup.select('div[class="book_info"] div[class="book_box"] dl dd')[2].span.string.split(u'：' )[1]
+        bookItem['describe'] = soup.select('div[class="book_about"] dl dd')[0].get_text() #使用get_text可以提取该标签里包含的标签
         bookItem['bookUrl'] = response.request.url
         bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # LastUpdatechapter = self.bookService.getLastUpdatechapter(bookItem["id"])
-        # if(LastUpdatechapter == None):
-        #     #print '本书还未采集！！！'
-        #     #bookContentUrl = response.xpath('//div[@id="list"]/dl/dt')[1].xpath('dd')[0].xpath('a/attribute::href').extract()[0]
-        #     bookContentUrl = soup.find('div', id="list").dl.find_all('dt')[1].next_sibling.next_sibling.a.attrs['href']
-        #     if bookContentPatten.search(bookContentUrl) :
-        #         bookContentUrl = response.request.url + bookContentPatten.search(bookContentUrl).group()
-        #     else:
-        #         bookContentUrl = 'https://www.qu.la' + bookContentUrl
-        #     firstChapterUrl = bookContentUrl
-        #     print u'书名：'+ bookItem['name']+ u',第一章地址：'+firstChapterUrl
-        # else:
-        #     print '本编号：'+str(LastUpdatechapter[0]) + ',章节地址：'+str(LastUpdatechapter[1])
         yield bookItem
 
         book_content_list = response.xpath('//div[@id="list"]/dl/dd')
