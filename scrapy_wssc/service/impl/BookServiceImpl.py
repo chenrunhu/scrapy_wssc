@@ -19,8 +19,8 @@ class BookServiceImpl(BookService):
             database='wsscdb',
             user='postgres',
             password='postgres',
-            host='10.0.0.19',
-            port='5432',
+            host='p19l982969.51mypc.cn',
+            port='12191',
         )
         self.cursor = self.connection.cursor()
 

@@ -72,19 +72,6 @@ class mobile_spider(scrapy.Spider):
         bookItem['bookUrl'] = response.request.url
         bookItem['create_date'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # LastUpdatechapter = self.bookService.getLastUpdatechapter(bookItem["id"])
-        # if(LastUpdatechapter == None):
-        #     #print '本书还未采集！！！'
-        #     #bookContentUrl = response.xpath('//div[@id="list"]/dl/dt')[1].xpath('dd')[0].xpath('a/attribute::href').extract()[0]
-        #     bookContentUrl = soup.find('div', id="list").dl.find_all('dt')[1].next_sibling.next_sibling.a.attrs['href']
-        #     if bookContentPatten.search(bookContentUrl) :
-        #         bookContentUrl = response.request.url + bookContentPatten.search(bookContentUrl).group()
-        #     else:
-        #         bookContentUrl = 'https://www.qu.la' + bookContentUrl
-        #     firstChapterUrl = bookContentUrl
-        #     print u'书名：'+ bookItem['name']+ u',第一章地址：'+firstChapterUrl
-        # else:
-        #     print '本编号：'+str(LastUpdatechapter[0]) + ',章节地址：'+str(LastUpdatechapter[1])
         yield bookItem
 
         book_content_list = response.xpath('//div[@id="list"]/dl/dd')
