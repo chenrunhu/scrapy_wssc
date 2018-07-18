@@ -59,12 +59,14 @@ class biqukan_mobile_spider(scrapy.Spider):
 
         soup = bs4.BeautifulSoup(response.text, 'lxml')
         bookContentItem = BookContentItem();
-        if re.match(pattern1, response.meta['book_content_href'], flags=0):
-            bookContentItem['id'] = pattern1.search(response.meta['book_content_href']).group(3)
+
+        book_content_href = response.meta['book_content_href']
+        if re.match(pattern1, book_content_href, flags=0):
+            bookContentItem['id'] = pattern1.search(book_content_href).group(3)
             bookContentItem['title'] = soup.select('div[class="header"] span[class="title"]')[0].string.split(u'_')[0].strip()
-        elif re.match(pattern2, response.meta['book_content_href'], flags=0):
-            bookContentItem['id'] = pattern2.search(response.meta['book_content_href']).group(3).split("_")[0]
-            bookContentItem['title'] = soup.select('div[class="header"] span[class="title"]')[0].string.split(u'_')[0].strip()+'_第'+str(int(pattern1.search(response.meta['book_content_href']).group(3).split("_")[1]) + 1)+'页'
+        elif re.match(pattern2, book_content_href, flags=0):
+            bookContentItem['id'] = pattern2.search(book_content_href).group(3).split("_")[0]
+            bookContentItem['title'] = soup.select('div[class="header"] span[class="title"]')[0].string.split(u'_')[0].strip()+u'（第'+ pattern2.search(book_content_href).group(3).split("_")[1] +u'页）'
 
         bookContentItem['bookId'] =  response.meta['bookId']
         bookContentItem['content'] = soup.find('div',id="chaptercontent").get_text()
@@ -75,6 +77,6 @@ class biqukan_mobile_spider(scrapy.Spider):
         next_content_href = soup.select('p[class="Readpage"] a[id="pb_next"]')[0].get('href')
         if next_content_href != response.meta['book_href']:
             yield scrapy.Request(url=u'http://m.biqukan.com' + next_content_href, callback=self.get_book_content,
-                             meta={"bookId":response.meta['bookId'], "book_content_href": next_content_href})
+                             meta={"bookId":response.meta['bookId'], "book_content_href": next_content_href,"book_href":response.meta['book_href']})
 
 
