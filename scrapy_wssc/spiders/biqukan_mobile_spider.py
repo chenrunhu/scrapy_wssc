@@ -47,22 +47,21 @@ class biqukan_mobile_spider(scrapy.Spider):
 
         yield bookItem
 
-        book_content_list = response.xpath('//div[@id="list"]/dl/dd')
+        book_content_list = soup.select('div[class="books"] div[class="book_last"]')[1].dl.find_all('dd')
         for con_li in book_content_list:
-            con_url =  con_li.xpath('a/attribute::href').extract()[0]
-            if con_url.startswith('/book/'):
-                yield scrapy.Request(url='https://www.qu.la' + con_url, callback=self.get_book_content,
-                                     meta={'url': 'https://www.qu.la' + con_url, "bookId": bookItem["id"]})
+            book_content_href = con_li.select('a')[0].get('href')
+            yield scrapy.Request(url=u'http://m.biqukan.com' + book_content_href, callback=self.get_book_content,
+                                 meta={'book_content_href': book_content_href, "bookId": bookItem["id"]})
 
 
     def get_book_content(self,response):
-        pattern = re.compile(r'^(https://www.qu.la/.*?)(\d+)(.html)$')
+        pattern = re.compile(r'^\/(\d+)\/(\d+)\/(\d+).html$')
 
         soup = bs4.BeautifulSoup(response.text, 'lxml')
         bookContentItem = BookContentItem();
-        bookContentItem['id'] = pattern.search(response.meta['url']).group(2)
+        bookContentItem['id'] = pattern.search(response.meta['book_content_href']).group(3)
         bookContentItem['bookId'] =  response.meta['bookId']
-        bookContentItem['title'] =  soup.find('div',attrs={"class":"bookname"}).h1.get_text()
+        bookContentItem['title'] =  soup.select('div[class="header"] span[class="title"]')[0].string
         bookContentItem['content'] = soup.find('div',id="content").get_text()
         bookContentItem['linkUrl'] = response.meta['url']
         bookContentItem['createDate'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
