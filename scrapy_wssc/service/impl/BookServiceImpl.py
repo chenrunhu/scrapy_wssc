@@ -19,8 +19,8 @@ class BookServiceImpl(BookService):
             database='wsscdb',
             user='postgres',
             password='postgres',
-            host='p19l982969.51mypc.cn',
-            port='12191',
+            host='10.0.0.19',
+            port='5432',
         )
         self.cursor = self.connection.cursor()
 
@@ -45,7 +45,17 @@ class BookServiceImpl(BookService):
         try:
             self.cursor.execute(self.cursor.mogrify(_sql))
             self.connection.commit()
+        except Exception, e:
+            self.connection.rollback()
+            print "Error: %s" % e
 
+    def addBookSubContent(self, item):
+        _sql = """INSERT INTO t_book_sub_content(id,book_id,title,content,create_date,link_url)
+                                              VALUES ('%s','%s','%s','%s','%s','%s');""" % (
+            item['id'], item['bookId'], item['title'], item['content'], item['createDate'], item['linkUrl'])
+        try:
+            self.cursor.execute(self.cursor.mogrify(_sql))
+            self.connection.commit()
         except Exception, e:
             self.connection.rollback()
             print "Error: %s" % e
@@ -66,3 +76,4 @@ class BookServiceImpl(BookService):
         except Exception, e:
             self.connection.rollback()
             print "Error: %s" % e
+

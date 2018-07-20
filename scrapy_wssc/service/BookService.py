@@ -14,6 +14,9 @@ class BookService(object):
     def addBookContent(self, item):
         pass
 
+    def addBookSubContent(self, item):
+        pass
+
     #查询小说最新采集的章节
     def getLastUpdatechapter(self,bookId):
         pass
